@@ -1,10 +1,9 @@
-from pickle import GLOBAL
-
 from task_manager import TaskManager
 from task import Task
 
 CAPACITY_DAYS = 22
 Added_Priority = 17
+
 
 def show_menu():
     print("""
@@ -22,6 +21,8 @@ def show_menu():
 0. Exit
 ============================
 """)
+
+
 # 5. הצגת כל המשימות לפי עדיפות
 # 6. איתור משימה לפי ID
 # 7. הוספת משימה לתור הביצוע
@@ -62,7 +63,8 @@ def main():
             for t in assigned:
                 print(" -", t)
             if bumped:
-                print(f"\nTasks that aren't scheduled for this month (priority + {Added_Priority} applied and returned to priority list):")
+                print(
+                    f"\nTasks that aren't scheduled for this month (priority + {Added_Priority} applied and returned to priority list):")
                 for t in bumped:
                     print(" -", t)
             else:
@@ -87,19 +89,78 @@ def main():
                         print(" -", t)
             except ValueError:
                 print("Invalid input...")
+                # Drop-in replacement for option 8: update ONE field per step, then ask again.
+
         elif choice == "8":
             try:
-                tid = int(input("Enter ID to Update: "))
-                desc = input("New Description (Leave empty if no update needed)): ").strip()
-                dur = input("New Duration (Leave empty if no update needed)): ").strip()
-                pr = input("New Priority (Leave empty if no update needed)):").strip()
-                dur = int(dur) if dur else None
-                pr = int(pr) if pr else None
-                desc = desc if desc else None
-                ok, msg = pm.update_task(tid, description=desc, duration=dur, priority=pr)
-                print("Task has been ", msg)
+                tid = int(input("Enter ID to update: ").strip())
+                while True:
+                    print("\nChoose ONE field to update (or Q to stop update):")
+                    print("1) Description")
+                    print("2) Duration (days)")
+                    print("3) Priority")
+                    sel = input("Enter your choice (1/2/3 or Q): ").strip().lower()
+
+                    if sel == "q":
+                        print("Update flow finished.")
+                        break
+                    if sel == "1":
+                        val = input("New Description: ").strip()
+                        if not val:
+                            print("No value provided. Skipping.")
+                            continue
+                        print(f"\nSummary: Description -> {val}")
+                        confirm = input("Apply? (y/n): ").strip().lower()
+                        if confirm != "y":
+                            print("Cancelled.")
+                            continue
+                        ok, msg = pm.update_task(tid, description=val)
+                        print(msg)
+                    elif sel == "2":
+                        val = input("New Duration (days, integer): ").strip()
+                        if not val:
+                            print("No value provided. Skipping.")
+                            continue
+                        try:
+                            ival = int(val)
+                        except ValueError:
+                            print("Duration must be an integer.")
+                            continue
+                        print(f"\nSummary: Duration -> {ival}")
+                        confirm = input("Apply? (y/n): ").strip().lower()
+                        if confirm != "y":
+                            print("Cancelled.")
+                            continue
+                        ok, msg = pm.update_task(tid, duration=ival)
+                        print(msg)
+
+                    elif sel == "3":
+                        val = input("New Priority (integer): ").strip()
+                        if not val:
+                            print("No value provided. Skipping.")
+                            continue
+                        try:
+                            ival = int(val)
+                        except ValueError:
+                            print("Priority must be an integer.")
+                            continue
+                        print(f"\nSummary: Priority -> {ival}")
+                        confirm = input("Apply? (y/n): ").strip().lower()
+                        if confirm != "y":
+                            print("Cancelled.")
+                            continue
+                        ok, msg = pm.update_task(tid, priority=ival)
+                        print(msg)
+
+                    else:
+                        print("Invalid selection. Choose 1/2/3 or Q.")
+                        continue
+
+                    # after one update, loop back to allow another single-field update or quit
+
             except ValueError:
                 print("Invalid input...")
+
         elif choice == "9":
             pq = pm.create_priority_queue()
             print("Tasks in Priority line: ")
@@ -118,6 +179,7 @@ def main():
             break
         else:
             print("Wrong input...try again...")
+
 
 if __name__ == "__main__":
     main()

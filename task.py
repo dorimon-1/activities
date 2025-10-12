@@ -9,6 +9,7 @@ class Task:
         self.description = description
         self.priority = priority
         self.duration = duration
+        # self.status = status
         self.next = None
 
     def __str__(self):

@@ -65,7 +65,7 @@ class TaskManager:
         if not self.exec_queue:
             return
         for t in self.exec_queue:
-            self._set_state(t.task_id, done=True, in_exec=False)
+            self.set_state(t.task_id, done=True, in_exec=False)
             # שים לב: לא מוחקים מ-Hashtable; הן נשארות במאגר הכללי כ'היסטוריה'
             # וגם אינן ב-Treap (הוסר בעת השיבוץ), שזה תקין — הן כבר בוצעו.
         self.exec_queue.clear()
