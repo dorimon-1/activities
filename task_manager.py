@@ -1,20 +1,28 @@
-from menu import CAPACITY_DAYS, Added_Priority
+# from menu import CAPACITY_DAYS, Added_Priority
 from task import Task
 from treap_dataset import Treap
-from hashtable_dataset import Hashtable
+from task_rep import Hashtable
+from execution_queue import ExecutionQueue
+from completed_rep import CompletedRepository
+from task_status import Status
+
+CAPACITY_DAYS = 22
+Added_Priority = 17
+
 
 class TaskManager:
     def __init__(self):
         self.table = Hashtable()
-        self.exec_queue = []
+        self.exec = ExecutionQueue(max_days=CAPACITY_DAYS)  # במקום self.exec_queue = []
         self.treap = Treap()
+        self.completed_tasks = CompletedRepository()
         self.task_state = {}  # {task_id: {"deferred": bool, "rejected": bool, "done": bool, "last_priority": int}}
         self.archive_done = set()  # ids שבוצעו
         self.archive_rejected = set()  # ids שנדחו
 
     def init_system(self):
         self.table = Hashtable()
-        self.exec_queue = []
+        self.exec = ExecutionQueue(max_days=CAPACITY_DAYS)  # במקום רשימה
         self.treap = Treap()
         self.task_state = {}  # {task_id: {"deferred": bool, "rejected": bool, "done": bool, "last_priority": int}}
         self.archive_done = set()  # ids שבוצעו
@@ -27,16 +35,18 @@ class TaskManager:
         return added_task
 
     def remove_task(self, task_id: int):
-        task_to_remove = self.table.get_task(task_id)
+        task_to_remove: Task = self.table.get_task(task_id)
         if not task_to_remove:
             return False
+        if task_to_remove.status == Status.COMPLETED:
+            self.completed_tasks.add_task(task_to_remove)
         delete_hash = self.table.remove_task(task_id)
         return delete_hash
 
     def get_task(self, task_id: int):
         return self.table.get_task(task_id)
 
-    def update_task(self, task_id, description=None, duration=None, priority=None):
+    def update_task(self, task_id, description=None, duration=None, priority=None, status=None):
         task = self.table.get_task(task_id)
         if not task:
             return False, "Task not found..."
@@ -48,6 +58,8 @@ class TaskManager:
             updated |= self.table.update_task(task_id, "duration", duration)
         if priority is not None:
             updated |= self.table.update_task(task_id, "priority", priority)
+        if status is not None:
+            updated |= self.table.update_task(task_id, "status", status)
             # להביא שוב את האובייקט (העדיפות כבר עודכנה) ולהכניס חזרה ל־Treap
             self.treap.update_task_priority(task_id, priority)
 
@@ -61,14 +73,13 @@ class TaskManager:
         return self.treap.to_list(order=order)
 
     def close_previous_month(self):
-        """מסמן את משימות החודש הקודם כ-DONE ומשחרר את התור, בלי למחוק מה-Hashtable."""
-        if not self.exec_queue:
+        if not self.exec:
             return
-        for t in self.exec_queue:
+        for t in self.exec.as_list():
             self.set_state(t.task_id, done=True, in_exec=False)
-            # שים לב: לא מוחקים מ-Hashtable; הן נשארות במאגר הכללי כ'היסטוריה'
-            # וגם אינן ב-Treap (הוסר בעת השיבוץ), שזה תקין — הן כבר בוצעו.
-        self.exec_queue.clear()
+            t.mark_completed()
+            self.completed_tasks.add_task(t)
+        self.exec.clear()
 
     def assign_month_simple(self, capacity_days: int = CAPACITY_DAYS):
         """
@@ -80,30 +91,23 @@ class TaskManager:
         # 1) סגירת חודש קודם
         self.close_previous_month()
 
-        # 2) בחירה לפי עדיפויות
         ordered = self.treap.to_list(order="desc")
-        total = 0
         assigned, waiting = [], []
 
         for t in ordered:
             st = self.task_state.get(t.task_id, {})
             if st.get("done") or st.get("rejected") or st.get("in_exec"):
                 continue
-            if total + t.duration <= capacity_days:
-                assigned.append(t);
-                total += t.duration
+
+            ok, _ = self.exec.enqueue(t)
+            if ok:
+                self.treap.delete_by_id(t.task_id)
+                t.mark_scheduled()
+                self.set_state(t.task_id, in_exec=True, deferred=False, done=False, last_priority=t.priority)
+                assigned.append(t)
             else:
                 waiting.append(t)
-
-        # 3) משובצות: לתור + הסרה מה-Treap + נשארות ב-Hashtable
-        for t in assigned:
-            self.exec_queue.append(t)
-            self.treap.delete_by_id(t.task_id)  # יוצא ממאגר העדיפויות
-            self.set_state(t.task_id, in_exec=True, deferred=False, done=False, last_priority=t.priority)
-
-        # 4) ממתינות: רק סימון (אישור/דחייה בשלב נפרד)
-        for t in waiting:
-            self.set_state(t.task_id, deferred=True, in_exec=False, done=False, last_priority=t.priority)
+                self.set_state(t.task_id, deferred=True, in_exec=False, done=False, last_priority=t.priority)
 
         return assigned, waiting
 
@@ -123,17 +127,15 @@ class TaskManager:
         if not task:
             return False, "Task not found."
 
-        if any(t.task_id == task_id for t in self.exec_queue):
+        if self.exec.contains(task_id):
             return False, "Task already in execution queue."
 
-        used = sum(t.duration for t in self.exec_queue)
-        remaining = CAPACITY_DAYS - used
-        if task.duration > remaining:
+        ok, msg = self.exec.enqueue(task)
+        if not ok:
             return False, "Not enough remaining capacity. Use force-insert if needed."
 
-        # schedule
-        self.exec_queue.append(task)
-        self.treap.delete_by_id(task_id)  # remove from priority repo while scheduled
+        self.treap.delete_by_id(task_id)  # לא יופיע בעדיפויות החודש
+        task.mark_scheduled()  # סטטוס: SCHEDULED
         self.set_state(task_id, in_exec=True, deferred=False, done=False, last_priority=task.priority)
         return True, "Task inserted into execution queue."
 
@@ -147,59 +149,26 @@ class TaskManager:
         task = self.get_task(task_id)
         if not task:
             return False, "Task not found.", []
-
-        if any(t.task_id == task_id for t in self.exec_queue):
+        if self.exec.contains(task_id):
             return False, "Task already in execution queue.", []
 
-        used = sum(t.duration for t in self.exec_queue)
-        remaining = CAPACITY_DAYS - used
-        removed = []
+        ok, msg, removed = self.exec.force_enqueue(task)
+        if not ok:
+            return False, msg, []
 
-        # Need to free space?
-        if task.duration > remaining:
-            # remove lowest-priority tasks first
-            by_lowest = sorted(self.exec_queue, key=lambda x: (x.priority, x.task_id))
-            need = task.duration - remaining
-            freed = 0
-            to_remove_ids = set()
+        # משימות שפינינו מהתור חוזרות לעדיפויות + סטטוס PENDING
+        for r in removed:
+            self.treap.insert(r)
+            r.mark_pending()
+            self.set_state(r.task_id, in_exec=False)
 
-            for cand in by_lowest:
-                to_remove_ids.add(cand.task_id)
-                freed += cand.duration
-                if freed >= need:
-                    break
-
-            # rebuild queue without removed
-            keep = []
-            for t in self.exec_queue:
-                if t.task_id in to_remove_ids:
-                    removed.append(t)
-                else:
-                    keep.append(t)
-            self.exec_queue = keep
-
-            # tasks we removed go back to Treap and are no longer in_exec
-            for r in removed:
-                self.treap.insert(r)
-                self.set_state(r.task_id, in_exec=False)  # they are not in the monthly queue anymore
-
-            # verify capacity after removals
-            remaining = CAPACITY_DAYS - sum(t.duration for t in self.exec_queue)
-            if task.duration > remaining:
-                # rollback: put queue back as it was and remove reinserts from Treap
-                for r in removed:
-                    self.treap.delete_by_id(r.task_id)
-                self.exec_queue.extend(removed)
-                return False, "Not enough capacity even after removing low-priority tasks.", []
-
-        # now there is enough room
-        self.exec_queue.append(task)
-        self.treap.delete_by_id(task_id)  # remove from Treap while scheduled
+        # המשימה החדשה לא אמורה להופיע ב-Treap בזמן שהיא מתוזמנת
+        self.treap.delete_by_id(task_id)
+        task.mark_scheduled()
         self.set_state(task_id, in_exec=True, deferred=False, done=False, last_priority=task.priority)
 
-        msg = "Task forcibly inserted into execution queue."
         if removed:
-            msg += f" Removed {len(removed)} task(s) to free space."
+            msg += f" Returned {len(removed)} task(s) to priority repository."
         return True, msg, removed
 
     def process_waiting(self, approve_all: bool | None = None,
@@ -259,7 +228,7 @@ class TaskManager:
         in_treap = self.treap.find_node_by_id(self.treap.root, task_id) is not None
 
         st = self.task_state.get(task_id, {"in_exec": False, "deferred": False, "rejected": False, "done": False,
-                                            "last_priority": None})
+                                           "last_priority": None})
         return {
             "task_exists": in_hash or in_exec or in_treap,
             "in_task_repository": in_hash,
@@ -308,7 +277,8 @@ class TaskManager:
 
     @property
     def exec_queue_as_list(self):
-        return self.exec_queue
+        """This function calls the function in execution repo"""
+        return self.exec.as_list()
 
     def system_preset(self):
         print("Adding Preset tasks...")
@@ -346,4 +316,3 @@ class TaskManager:
             self.add_task(task)
 
         print(f" {len(tasks)} tasks loaded into the system.")
-
