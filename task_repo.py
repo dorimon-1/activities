@@ -77,5 +77,4 @@ class Hashtable:
                 bucket.display()
 
 
-# This script of task manager yet to include functions of integration with 2 data structures.
-# TODO: write functions which sends the tasks that were created and inserted to task manager to other data structures.
+
