@@ -1,4 +1,8 @@
+#Written by:
+# דניאל קצ'מרק
 from collections import deque
+
+
 
 class ExecutionQueue:
     """
@@ -6,7 +10,7 @@ class ExecutionQueue:
     Tracks total scheduled days and enforces a monthly capacity (default 22).
     """
 
-    def __init__(self, max_days: int = 22):
+    def __init__(self, max_days: int = 0):
         self._q = deque()
         self._max_days = max_days
         self._total_days = 0
@@ -89,25 +93,24 @@ class ExecutionQueue:
         return t
 
     def peek(self):
+        """Shows the first task in tail"""
         return self._q[0] if self._q else None
 
-    def remove_by_id(self, task_id: int):
-        """Remove a specific task by id anywhere in the queue. Returns the removed task or None."""
-        if not self._q:
-            return None
-        tmp = deque()
-        removed = None
-        while self._q:
-            t = self._q.popleft()
-            if removed is None and t.task_id == task_id:
-                removed = t
-                self._sub_days(t.duration)
-            else:
-                tmp.append(t)
-        self._q = tmp
-        return removed
+
+    def remove_by_id(self, task_id: int) -> bool:
+        """
+        Remove a specific task by id anywhere in the queue.
+        Returns True if the task was removed, False otherwise.
+        """
+        for i, t in enumerate(self._q):
+            if t.task_id == task_id:
+                self._sub_days(t.duration)  # Update the free execution days
+                del self._q[i]  # delete the task
+                return True
+        return False
+
 
     def clear(self):
-        """Used to clear the execution using generic function and reverting the 'total_days' to 0 """
+        """Used to clear the execution queue using generic function and reverting the 'total_days' to 0 """
         self._q.clear()
         self._total_days = 0

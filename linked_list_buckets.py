@@ -1,4 +1,6 @@
-from task_rep_node import TaskNode
+#Written by:
+#  ישראל-חי זליכה
+from task_repo_node import TaskNode
 
 class LinkedList:
     def __init__(self):

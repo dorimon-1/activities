@@ -1,8 +1,9 @@
-import random
-
+#Written by:
+#דור סהר
 class TreapNode:
     __slots__ = ("key", "prio", "left", "right", "task")
-    def __init__(self, key, prio, task = None):
+
+    def __init__(self, key, prio, task=None):
         self.key = key
         self.prio = prio
         self.left = None
@@ -23,21 +24,6 @@ def rotate_left(x):
     x.right = T2
     return y
 
-# def treap_insert(t, key, value):
-#     if t is None:
-#         t = TreapNode(key, value)
-#         return t
-#     if key < t.key:
-#         t.left = treap_insert(t.left, key, value)
-#         if t.left and t.left.prio > t.prio:
-#             t = rotate_right(t)
-#     elif key > t.key:
-#         t.right = treap_insert(t.right, key, value)
-#         if t.right and t.right.prio > t.prio:
-#             t = rotate_left(t)
-#     else:
-#         t.prio = value
-#     return t
 def treap_insert(t, key, heap_prio, task):
     if t is None:
         return TreapNode(key, heap_prio, task)
@@ -50,7 +36,6 @@ def treap_insert(t, key, heap_prio, task):
         if t.right and t.right.prio > t.prio:
             t = rotate_left(t)
     else:
-        # מפתח קיים: נעדכן מטא־דאטה/טסק (לפי הצורך)
         t.prio = heap_prio
         t.task = task
     return t
@@ -107,7 +92,6 @@ class Treap:
         self.root = None
 
     def insert(self, task):
-        # נשמור BST לפי (priority, task_id) כדי לאפשר סדר + ייחודיות
         key = (task.priority, task.task_id)
         heap_prio = task.priority # heap priority -> MAX-HEAP
         self.root = treap_insert(self.root, key, heap_prio, task)
@@ -120,7 +104,7 @@ class Treap:
         if not self.root:
             return None
         max_task = self.root.task
-        self.root = treap_merge(self.root.left, self.root.right)  # מוחקים את השורש
+        self.root = treap_merge(self.root.left, self.root.right)
         return max_task
 
     def find_node_by_id(self, node, task_id):
@@ -136,18 +120,15 @@ class Treap:
         node = self.find_node_by_id(self.root, task_id)
         if not node:
             return False
-        self.root = treap_delete(self.root, node.key)  # מוחקים לפי key בפועל (priority, task_id)
+        self.root = treap_delete(self.root, node.key)
         return True
 
     def update_task_priority(self, task_id, new_priority):
         node = self.find_node_by_id(self.root, task_id)
         if not node or not node.task:
             return False
-        # 1) מוחקים את הצומת הישן (המפתח הישן כולל את העדיפות הישנה)
         self.root = treap_delete(self.root, node.key)
-        # 2) מעדכנים את המשימה
         node.task.priority = new_priority
-        # 3) מכניסים מחדש — heap_prio יהיה new_priority (שומר Max-Heap)
         return self.insert(node.task)
 
     def to_list(self, order="des"):

@@ -1,6 +1,6 @@
+#Written by:
+#תמיד אבני
 from task import Task
-from treap_dataset import Treap
-
 from linked_list_buckets import LinkedList
 
 class Hashtable:
@@ -45,12 +45,9 @@ class Hashtable:
         return self.table[idx].remove(task_id)
 
     def update_task(self, task_id, field: str, new_value) -> bool:
-        idx = self._hash_func(task_id)
-        t = self.table[idx].find(task_id)
-
+        t = self.get_task(task_id)
         if not t:
             return False
-
         if field == "description":
             t.set_description(str(new_value))
         elif field == "priority":
@@ -59,7 +56,6 @@ class Hashtable:
             t.set_duration(int(new_value))
         else:
             return False
-
         return True
 
     def __len__(self):

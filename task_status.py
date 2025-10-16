@@ -1,3 +1,5 @@
+#Written by:
+#  ישראל-חי זליכה
 from enum import Enum
 
 
@@ -5,7 +7,5 @@ class Status(Enum):
     PENDING = "pending"
     SCHEDULED = "scheduled"
     COMPLETED = "completed"
-    CANCELLED = "cancelled"
+    CANCELLED = "canceled"
     DELAYED = "delayed"
-    IN_PROGRESS = "in progress"
-

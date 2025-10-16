@@ -1,5 +1,6 @@
+#Written by:
+#תמיד אבני
 from task_status import Status
-
 
 class Task:
     _id_generator = 100
@@ -10,11 +11,12 @@ class Task:
         self.description = description
         self.priority = priority
         self.duration = duration
-        self.status = status
+        self._status = None
+        self.set_status(status)  # יעבור דרך הולידציה
 
     def __str__(self):
         return (f"Task #{self.task_id}: {self.description} "
-                f"(priority: {self.priority}, duration: {self.duration} days)")
+                f"(priority: {self.priority}, duration: {self.duration} days, status: {self.status.name})")
 
     def get_description(self):
         return self.description
@@ -26,7 +28,7 @@ class Task:
         return self.duration
 
     def get_status(self):
-        return self.status
+        return self._status
 
     def set_description(self, description: str):
         self.description = description
@@ -37,20 +39,16 @@ class Task:
     def set_duration(self, duration: int):
         self.duration = duration
 
-    def mark_pending(self):
-        self.status = Status.PENDING
+    # ----- status (Enum-only) -----
+    @property
+    def status(self) -> Status:
+        return self._status
 
-    def mark_scheduled(self):
-        self.status = Status.SCHEDULED
+    @status.setter
+    def status(self, value: Status):
+        self.set_status(value)
 
-    def mark_completed(self):
-        self.status = Status.COMPLETED
-
-    def mark_cancelled(self):
-        self.status = Status.CANCELLED
-
-    def mark_delayed(self):
-        self.status = Status.DELAYED
-
-    def mark_in_progress(self):
-        self.status = Status.IN_PROGRESS
+    def set_status(self, status: Status):
+        if not isinstance(status, Status):
+            raise TypeError("status must be a Status enum")
+        self._status = status

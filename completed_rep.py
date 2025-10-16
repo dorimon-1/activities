@@ -1,3 +1,5 @@
+#Written by:
+#תמיד אבני
 from task import Task
 from task_status import Status
 
@@ -9,8 +11,10 @@ class CompletedRepository:
 
     def add_task(self, task: Task):
         if task.status != Status.COMPLETED:
-            raise ValueError("Can't add task that isn't completed")
+            return False
+            # raise ValueError("Can't add task that isn't completed")
         self.completed_tasks[task.task_id] = task
+        return True
 
     def get_task(self, task_id: int):
         return self.completed_tasks.get(task_id, None)
