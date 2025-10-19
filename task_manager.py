@@ -13,6 +13,13 @@ Added_Priority = 17  # Preset number to be used for the amount of priority we ad
 
 class TaskManager:
     def __init__(self):
+        """
+        Initializes the TaskManager with:
+        - A hashtable for storing tasks.
+        - An execution queue with monthly capacity.
+        - A Treap for priority ordering of tasks.
+        - A repository for completed tasks.
+        """
         self.table = Hashtable()
         self.exec = ExecutionQueue(max_days=CAPACITY_DAYS)
         self.treap = Treap()
@@ -20,24 +27,53 @@ class TaskManager:
 
 
     def init_system(self):
+        """
+        Resets the TaskManager to its initial empty state.
+        All tables, queues, and repositories are cleared.
+        """
         self.table = Hashtable()
         self.exec = ExecutionQueue(max_days=CAPACITY_DAYS)
         self.treap = Treap()
         self.completed_tasks = CompletedRepository()
 
-
     def add_task(self, task: Task):
-        """Adding a task to the tasks table and to the priority queue"""
+        """
+        Adds a new task to the system.
+        Inserts the task into the hashtable and the priority treap.
+
+        Args:
+            task (Task): The task object to add.
+
+        Returns:
+            bool: True if task was successfully added, False otherwise.
+        """
         added_task = self.table.add_task(task)
         if added_task:
             self.treap.insert(task)
         return added_task
 
     def get_task(self, task_id: int):
+        """
+        Retrieves a task from the system by its ID.
+
+        Args:
+            task_id (int): The ID of the task to retrieve.
+
+        Returns:
+            Task or None: The task object if found, else None.
+        """
         return self.table.get_task(task_id)
 
     def remove_task(self, task_id: int):
-        """Removing a task from the tasks table"""
+        """
+        Removes a task from all system repositories: table, treap, and execution queue.
+
+        Args:
+            task_id (int): The ID of the task to remove.
+
+        Returns:
+            bool: True if any repository removed the task, False if task not found.
+        """
         task_to_remove: Task = self.table.get_task(task_id)
         if not task_to_remove:
             return False
@@ -54,6 +90,19 @@ class TaskManager:
         return deleted
 
     def update_task(self, task_id, description=None, duration=None, priority=None):
+        """
+        Updates a task's properties (description, duration, priority).
+        If the task is not in the execution queue, updates its priority in the Treap as well.
+
+        Args:
+            task_id (int): ID of the task to update.
+            description (str, optional): New description.
+            duration (int, optional): New duration.
+            priority (int, optional): New priority.
+
+        Returns:
+            tuple: (bool updated, str message) indicating success and message.
+        """
         t = self.table.get_task(task_id)
         if not t:
             return False, "Task not found."
@@ -65,13 +114,22 @@ class TaskManager:
             updated |= self.table.update_task(task_id, "duration", duration)
         if priority is not None:
             updated |= self.table.update_task(task_id, "priority", priority)
-            # sync treap priority only if task is not currently in exec queue:
             if not self.exec.contains(task_id):
                 self.treap.update_task_priority(task_id, priority)
 
         return updated, ("Updated successfully" if updated else "Not updated")
 
     def set_task_status(self, task_id: int, new_status: Status) -> tuple[bool, str]:
+        """
+        Changes the status of a task and updates its location in repositories accordingly.
+
+        Args:
+            task_id (int): ID of the task to update.
+            new_status (Status): New status (PENDING, SCHEDULED, COMPLETED, etc.)
+
+        Returns:
+            tuple: (bool success, str message) indicating result.
+        """
         t = self.get_task(task_id)
         if not t:
             return False, "Task not found."
@@ -89,7 +147,6 @@ class TaskManager:
             if not ok:
                 t.set_status(old)  # rollback
                 return False, msg
-            # while scheduled, it must not be in treap
             self.treap.delete_by_id(task_id)
             return True, "Task scheduled (moved to execution queue)."
 
@@ -100,11 +157,9 @@ class TaskManager:
             return True, "Task set to pending (back to priority repository)."
 
         if new_status == Status.DELAYED:
-            # purely display status, no repo moves
             return True, "Task marked delayed."
 
         if new_status == Status.COMPLETED:
-            # remove from all operational repos and archive
             self.exec.remove_by_id(task_id)
             self.treap.delete_by_id(task_id)
             self.table.remove_task(task_id)
@@ -112,7 +167,6 @@ class TaskManager:
             return True, "Task completed: archived and removed from all repositories."
 
         if new_status == Status.CANCELLED:
-            # design choice: remove without archiving
             self.exec.remove_by_id(task_id)
             self.treap.delete_by_id(task_id)
             self.table.remove_task(task_id)
@@ -120,14 +174,16 @@ class TaskManager:
 
         return True, f"Status set to {new_status.name}."
 
-        # -------- helpers --------
-
     def insert_to_execution_queue(self, task_id: int) -> tuple[bool, str]:
         """
-        Insert a task to the execution queue (respects monthly capacity).
-        Removes the task from the Treap while it is scheduled,
-        keeps it in the Hashtable, and updates task-state flags.
-        Returns: (ok, message)
+        Inserts a task into the execution queue respecting capacity constraints.
+        Removes it from Treap while scheduled, keeps it in the table.
+
+        Args:
+            task_id (int): Task to schedule.
+
+        Returns:
+            tuple: (bool success, str message)
         """
         task = self.get_task(task_id)
         if not task:
@@ -140,6 +196,16 @@ class TaskManager:
         return True, "Enqueued."
 
     def force_insert_to_execution_queue(self, task_id: int) -> tuple[bool, str, list]:
+        """
+        Forcefully inserts a task into the execution queue, potentially removing other tasks.
+        Removed tasks are returned to the Treap.
+
+        Args:
+            task_id (int): Task to force insert.
+
+        Returns:
+            tuple: (bool success, str message, list removed_tasks)
+        """
         task = self.get_task(task_id)
         if not task:
             return False, "Task not found.", []
@@ -150,42 +216,71 @@ class TaskManager:
         if not ok:
             return False, msg, []
 
-        # removed tasks return to treap (status left as-is unless you decide otherwise)
         for r in removed:
             self.treap.insert(r)
 
         self.treap.delete_by_id(task_id)
-        # enforce status centrally (now it's scheduled)
         task.set_status(Status.SCHEDULED)
         return True, msg, removed
 
     def create_priority_queue(self, order="desc"):
         """
-        מחזיר רשימה של המשימות לפי עדיפות.
-        כברירת מחדל: מהגבוה לנמוך ('desc') כדי לשקף ערימת-מקס.
+        Returns the list of tasks sorted by priority.
+
+        Args:
+            order (str): "desc" for descending, "asc" for ascending priority.
+
+        Returns:
+            list: Sorted tasks.
         """
         return self.treap.to_list(order=order)
 
     def print_tasks_by_priority(self):
+        """
+        Returns a string representation of tasks ordered by priority.
+
+        Returns:
+            str: Tasks joined by newline.
+        """
         return "\n".join(str(t) for t in self.create_priority_queue())
 
     @property
     def exec_queue_as_list(self):
-        """This function calls the function in execution repo"""
+        """
+        Returns a list of tasks currently in the execution queue.
+
+        Returns:
+            list: Execution queue tasks.
+        """
         return self.exec.as_list()
 
     def completed_tasks_as_list(self):
-        """This function calls the function in complete class to print all completed tasks"""
+        """
+        Returns a list of all completed tasks.
+
+        Returns:
+            list: Completed tasks.
+        """
         return self.completed_tasks.list_all()
 
-    # -------- monthly processes --------
     def close_previous_month(self):
-        # mark all scheduled tasks as completed via the central API
+        """
+        Marks all scheduled tasks as completed and clears the execution queue.
+        """
         for t in self.exec.as_list():
             self.set_task_status(t.task_id, Status.COMPLETED)
         self.exec.clear()
 
     def assign_month_simple(self, capacity_days: int = CAPACITY_DAYS):
+        """
+        Assigns tasks for the current month until capacity is reached.
+
+        Args:
+            capacity_days (int): Maximum days for scheduling.
+
+        Returns:
+            tuple: (assigned_tasks, waiting_tasks)
+        """
         self.close_previous_month()
         assigned, waiting = [], []
         for t in self.treap.to_list(order="desc"):
@@ -197,53 +292,43 @@ class TaskManager:
         return assigned, waiting
 
     def system_preset(self):
-        """This function is performing a reset to all classes and tables
-         and then adds preset tasks to the system."""
-        self.init_system()  # Run init fun that resets all classes and lists
+        """
+        Resets the system and loads a predefined set of tasks into the system.
+        Resets Task ID generator if necessary.
+        """
+        self.init_system()
+        if Task.id_generator != 100:
+            Task._id_generator = 100
         print("System has been reset!")
         print("Adding Preset tasks...")
-        tasks = [
-            Task("Component A", 1, 2),
-            Task("Component B", 10, 5),
-            Task("Components C+D", 9, 1),
-            Task("Element Composite 3", 8, 10),
-            Task("Component E", 1, 3),
-            Task("Component F", 2, 3),
-            Task("Component G", 9, 5),
-            Task("New Component G", 10, 8),
-            Task("Simple Element A", 6, 7),
-            Task("Component H", 5, 5),
-            Task("Component J", 2, 5),
-            Task("Element Composite 3", 2, 10),
-            Task("Element Composite 4", 1, 12),
-            Task("Element Composite 5", 3, 18),
-            Task("Component A", 9, 2),
-            Task("Component E", 10, 3),
-            Task("New Component A", 4, 4),
-            Task("Component J - Reversed Steering Repair", 5, 5),
-            Task("Component Paint A", 6, 1),
-            Task("Component Paint A", 7, 1),
-            Task("Component Paint B", 8, 1),
-            Task("Component Paint C", 5, 1),
-            Task("Component A", 3, 2),
-            Task("Component A", 4, 2),
-            Task("Element Composite 3 - faulty", 9, 10),
-            Task("Element 5 - New", 7, 5)
-        ]
+        tasks = [Task("Component A", 1, 2),
+                 Task("Component B", 10, 5),
+                 Task("Components C+D", 9, 1),
+                 Task("Element Composite 3", 8, 10),
+                 Task("Component E", 1, 3),
+                 Task("Component F", 2, 3),
+                 Task("Component G", 9, 5),
+                 Task("New Component G", 10, 8),
+                 Task("Simple Element A", 6, 7),
+                 Task("Component H", 5, 5),
+                 Task("Component J", 2, 5), Task("Element Composite 3", 2, 10),
+                 Task("Element Composite 4", 1, 12),
+                 Task("Element Composite 5", 3, 18),
+                 Task("Component A", 9, 2),
+                 Task("Component E", 10, 3),
+                 Task("New Component A", 4, 4),
+                 Task("Component J - Reversed Steering Repair", 5, 5),
+                 Task("Component Paint A", 6, 1),
+                 Task("Component Paint A", 7, 1),
+                 Task("Component Paint B", 8, 1),
+                 Task("Component Paint C", 5, 1),
+                 Task("Component A", 3, 2),
+                 Task("Component A", 4, 2),
+                 Task("Element Composite 3 - faulty", 9, 10),
+                 Task("Element 5 - New", 7, 5)]
         for task in tasks:
             self.add_task(task)
 
         print(f"{len(tasks)} tasks loaded into the system.")
 
-    def reset_system(self):
-        """
-        Resets the TaskManager system to its initial state (like system_preset).
-        """
 
-        self.table = Hashtable()
-        self.exec = ExecutionQueue(max_days=CAPACITY_DAYS)
-        self.treap = Treap()
-        self.completed_tasks = CompletedRepository()
-        self.system_preset()
-
-        print("System has been reset to initial state.")

@@ -87,8 +87,8 @@ def main():
         else:
             match choice:
                 case 1:
-                    pm.reset_system()
-                    print("System has been reset.")
+                    pm.system_preset()
+                    print("System has been reset and loaded with initial tasks.")
 
                 case 2:
                     try:
