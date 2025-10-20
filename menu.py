@@ -6,7 +6,7 @@ CAPACITY_DAYS = 22
 Added_Priority = 17
 
 
-def pre_init_menu(): # דניאל / סתיו
+def pre_init_menu(): # סתיו עזרא
     print("""
 ==== ACTIVITIES ====
 1. System initialization
@@ -15,7 +15,7 @@ def pre_init_menu(): # דניאל / סתיו
 """)
 
 
-def post_init_menu(): # דניאל / סתיו
+def post_init_menu(): # סתיו עזרא
     print("""
 ==== ACTIVITIES ====
 1. Reset system
@@ -34,7 +34,7 @@ def post_init_menu(): # דניאל / סתיו
 """)
 
 
-def update_menu(): # דניאל / סתיו
+def update_menu(): # סתיו עזרא
     print("""
     ==== Update task ====
     1. Description
@@ -44,7 +44,7 @@ def update_menu(): # דניאל / סתיו
     """)
 
 
-def status_menu(): # דניאל / סתיו
+def status_menu(): # סתיו עזרא
     print("""
     ==== status options ====
     1. pending
@@ -55,7 +55,7 @@ def status_menu(): # דניאל / סתיו
     """)
 
 
-def main(): # דניאל / סתיו
+def main(): # סתיו עזרא
 
     pm = TaskManager()
     initialized = False

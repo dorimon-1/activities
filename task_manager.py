@@ -63,7 +63,7 @@ class TaskManager:
         """
         return self.table.get_task(task_id)
 
-    def remove_task(self, task_id: int): # תמיר אבני/דניאל
+    def remove_task(self, task_id: int): # סתיו עזרא
         """
         Removes a task from all system repositories: table, treap, and execution queue.
 
@@ -118,7 +118,7 @@ class TaskManager:
 
         return updated, ("Updated successfully" if updated else "Not updated")
 
-    def set_task_status(self, task_id: int, new_status: Status) -> tuple[bool, str]: # תמיר אבני / דניאל
+    def set_task_status(self, task_id: int, new_status: Status) -> tuple[bool, str]: # סתיו עזרא
         """
         Changes the status of a task and updates its location in repositories accordingly.
 
@@ -173,7 +173,7 @@ class TaskManager:
 
         return True, f"Status set to {new_status.name}."
 
-    def insert_to_execution_queue(self, task_id: int): # דניאל /סתיו
+    def insert_to_execution_queue(self, task_id: int): # דניאל קצ'מרק
         """
         Inserts a task into the execution queue respecting capacity constraints.
         Removes it from Treap while scheduled, keeps it in the table.
@@ -194,7 +194,7 @@ class TaskManager:
             return False, "Not enough remaining capacity. Use force insert if needed."
         return True, "Enqueued."
 
-    def force_insert_to_execution_queue(self, task_id: int): # דניאל / סתיו
+    def force_insert_to_execution_queue(self, task_id: int): # דניאל קצ'מרק
         """
         Forcefully inserts a task into the execution queue, potentially removing other tasks.
         Removed tasks are returned to the Treap.
@@ -232,7 +232,7 @@ class TaskManager:
         return "\n".join(str(t) for t in self.treap.to_list())
 
     @property
-    def exec_queue_as_list(self): # דניאל / סתיו
+    def exec_queue_as_list(self): # דניאל קצ'מרק
         """
         Returns a list of tasks currently in the execution queue.
 
@@ -250,7 +250,7 @@ class TaskManager:
         """
         return self.completed_tasks.list_all()
 
-    def close_previous_month(self): # דניאל / סתיו
+    def close_previous_month(self): # דניאל קצ'מרק
         """
         Marks all scheduled tasks as completed and clears the execution queue.
         """
@@ -258,7 +258,7 @@ class TaskManager:
             self.set_task_status(t.task_id, Status.COMPLETED)
         self.exec.clear()
 
-    def assign_month_simple(self, capacity_days: int = CAPACITY_DAYS): # דניאל / סתיו
+    def assign_month_simple(self, capacity_days: int = CAPACITY_DAYS): # דניאל קצ'מרק
         """
         Assigns tasks for the current month until capacity is reached.
 
