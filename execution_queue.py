@@ -1,8 +1,4 @@
-#Written by:
-# דניאל קצ'מרק
 from collections import deque
-
-
 
 class ExecutionQueue:
     """
@@ -10,7 +6,7 @@ class ExecutionQueue:
     Tracks total scheduled days and enforces a monthly capacity (default 22).
     """
 
-    def __init__(self, max_days: int = 0):
+    def __init__(self, max_days: int = 0): # דניאל
         """
         Initializes the execution queue.
 
@@ -22,16 +18,16 @@ class ExecutionQueue:
         self._total_days = 0
 
     @property
-    def max_days(self) -> int:
+    def max_days(self) -> int: # דניאל
         """Returns the maximum number of days allowed for scheduling."""
         return self._max_days
 
     @property
-    def total_days(self) -> int:
+    def total_days(self) -> int: # דניאל
         """Returns the total number of days currently scheduled."""
         return self._total_days
 
-    def capacity_left(self) -> int:
+    def capacity_left(self) -> int: # דניאל
         """
         Returns the remaining days that can be scheduled.
 
@@ -40,54 +36,46 @@ class ExecutionQueue:
         """
         return self._max_days - self._total_days
 
-    def __len__(self) -> int:
+    def __len__(self) -> int: # דניאל
         """Returns the number of tasks currently in the queue."""
         return len(self._q)
 
-    def as_list(self):
+    def as_list(self): # דניאל
         """
         Returns a list of all tasks in the queue.
 
-        Returns:
-            list: Task objects in the queue.
         """
         return list(self._q)
 
-    def contains(self, task_id: int):
+    def contains(self, task_id: int): # דניאל
         """
         Checks if a task with the given ID is in the queue.
-
-        Args:
-            task_id (int): ID of the task.
-
         Returns:
             bool: True if the task is in the queue, False otherwise.
         """
         return any(t.task_id == task_id for t in self._q)
 
-    def _add_days(self, d: int):
+    def _add_days(self, d: int): # דניאל
         """
-        Adds days to the total scheduled days counter.
+        Adds days to the total scheduled days counter
 
-        Args:
-            d (int): Number of days to add.
+        d (int): Number of days to add
         """
         self._total_days += d
 
-    def _sub_days(self, d: int):
+    def _sub_days(self, d: int): # דניאל
         """
-        Subtracts days from the total scheduled days counter.
-        Ensures total_days does not go below zero.
+        Subtracts days from the total scheduled days counter
+        Ensures total_days does not go below zero
 
-        Args:
-            d (int): Number of days to subtract.
+        d (int): Number of days to subtract.
         """
         self._total_days -= d
         if self._total_days < 0:
             self._total_days = 0
 
     # ----- FIFO operations -----
-    def enqueue(self, task) -> tuple[bool, str]:
+    def enqueue(self, task) -> tuple[bool, str]: # דניאל
         """
         Adds a task to the tail of the queue if capacity allows.
 
@@ -99,18 +87,15 @@ class ExecutionQueue:
         """
         new_task_dur = task.duration
         if self._total_days + new_task_dur > self._max_days:
-            return False, "Not enough remaining capacity."
+            return False, "Not enough capacity remaining ."
         self._q.append(task)
         self._add_days(new_task_dur)
         return True, "Enqueued."
 
-    def force_enqueue(self, task) -> tuple[bool, str, list]:
+    def force_enqueue(self, task) -> tuple[bool, str, list]: # דניאל
         """
         Forcefully adds a task to the queue.
         Removes tasks from the tail if needed to make space.
-
-        Args:
-            task (Task): Task to add.
 
         Returns:
             tuple: (success (bool), message (str), removed_tasks (list))
@@ -132,7 +117,7 @@ class ExecutionQueue:
             msg += f" Removed {len(removed)} task(s) from queue tail."
         return True, msg, removed
 
-    def dequeue(self):
+    def dequeue(self): # דניאל
         """
         Removes and returns the first task in the queue (FIFO).
 
@@ -145,7 +130,7 @@ class ExecutionQueue:
         self._sub_days(t.duration)
         return t
 
-    def peek(self):
+    def peek(self): # דניאל
         """
         Returns the first task in the queue without removing it.
 
@@ -154,7 +139,7 @@ class ExecutionQueue:
         """
         return self._q[0] if self._q else None
 
-    def remove_by_id(self, task_id: int) -> bool:
+    def remove_by_id(self, task_id: int) -> bool: # דניאל
         """
         Removes a specific task from the queue by ID.
 
@@ -171,7 +156,7 @@ class ExecutionQueue:
                 return True
         return False
 
-    def clear(self):
+    def clear(self): # דניאל
         """
         Clears the queue and resets the total scheduled days counter.
         """

@@ -1,5 +1,4 @@
-#Written by:
-#תמיד אבני +ישראל-חי זליכה
+
 from task import Task
 from treap_dataset import Treap
 from task_repo import Hashtable
@@ -12,7 +11,7 @@ Added_Priority = 17  # Preset number to be used for the amount of priority we ad
 
 
 class TaskManager:
-    def __init__(self):
+    def __init__(self): # תמיר אבני
         """
         Initializes the TaskManager with:
         - A hashtable for storing tasks.
@@ -26,7 +25,7 @@ class TaskManager:
         self.completed_tasks = CompletedRepository()
 
 
-    def init_system(self):
+    def init_system(self): # ישראל חי - זליכה
         """
         Resets the TaskManager to its initial empty state.
         All tables, queues, and repositories are cleared.
@@ -36,7 +35,7 @@ class TaskManager:
         self.treap = Treap()
         self.completed_tasks = CompletedRepository()
 
-    def add_task(self, task: Task):
+    def add_task(self, task: Task): # תמיר אבני
         """
         Adds a new task to the system.
         Inserts the task into the hashtable and the priority treap.
@@ -52,7 +51,7 @@ class TaskManager:
             self.treap.insert(task)
         return added_task
 
-    def get_task(self, task_id: int):
+    def get_task(self, task_id: int): #  תמיר אבני
         """
         Retrieves a task from the system by its ID.
 
@@ -64,7 +63,7 @@ class TaskManager:
         """
         return self.table.get_task(task_id)
 
-    def remove_task(self, task_id: int):
+    def remove_task(self, task_id: int): # תמיר אבני/דניאל
         """
         Removes a task from all system repositories: table, treap, and execution queue.
 
@@ -89,7 +88,7 @@ class TaskManager:
 
         return deleted
 
-    def update_task(self, task_id, description=None, duration=None, priority=None):
+    def update_task(self, task_id, description=None, duration=None, priority=None): # ישראל חי - זליכה
         """
         Updates a task's properties (description, duration, priority).
         If the task is not in the execution queue, updates its priority in the Treap as well.
@@ -119,7 +118,7 @@ class TaskManager:
 
         return updated, ("Updated successfully" if updated else "Not updated")
 
-    def set_task_status(self, task_id: int, new_status: Status) -> tuple[bool, str]:
+    def set_task_status(self, task_id: int, new_status: Status) -> tuple[bool, str]: # תמיר אבני / דניאל
         """
         Changes the status of a task and updates its location in repositories accordingly.
 
@@ -174,7 +173,7 @@ class TaskManager:
 
         return True, f"Status set to {new_status.name}."
 
-    def insert_to_execution_queue(self, task_id: int) -> tuple[bool, str]:
+    def insert_to_execution_queue(self, task_id: int): # דניאל /סתיו
         """
         Inserts a task into the execution queue respecting capacity constraints.
         Removes it from Treap while scheduled, keeps it in the table.
@@ -195,7 +194,7 @@ class TaskManager:
             return False, "Not enough remaining capacity. Use force insert if needed."
         return True, "Enqueued."
 
-    def force_insert_to_execution_queue(self, task_id: int) -> tuple[bool, str, list]:
+    def force_insert_to_execution_queue(self, task_id: int): # דניאל / סתיו
         """
         Forcefully inserts a task into the execution queue, potentially removing other tasks.
         Removed tasks are returned to the Treap.
@@ -223,7 +222,7 @@ class TaskManager:
         task.set_status(Status.SCHEDULED)
         return True, msg, removed
 
-    def create_priority_queue(self, order="desc"):
+    def create_priority_queue(self, order="desc"): # דור סהר
         """
         Returns the list of tasks sorted by priority.
 
@@ -235,7 +234,7 @@ class TaskManager:
         """
         return self.treap.to_list(order=order)
 
-    def print_tasks_by_priority(self):
+    def print_tasks_by_priority(self): # דור סהר
         """
         Returns a string representation of tasks ordered by priority.
 
@@ -245,7 +244,7 @@ class TaskManager:
         return "\n".join(str(t) for t in self.create_priority_queue())
 
     @property
-    def exec_queue_as_list(self):
+    def exec_queue_as_list(self): # דניאל / סתיו
         """
         Returns a list of tasks currently in the execution queue.
 
@@ -254,7 +253,7 @@ class TaskManager:
         """
         return self.exec.as_list()
 
-    def completed_tasks_as_list(self):
+    def completed_tasks_as_list(self): # תמיר אבני
         """
         Returns a list of all completed tasks.
 
@@ -263,7 +262,7 @@ class TaskManager:
         """
         return self.completed_tasks.list_all()
 
-    def close_previous_month(self):
+    def close_previous_month(self): # דניאל / סתיו
         """
         Marks all scheduled tasks as completed and clears the execution queue.
         """
@@ -271,7 +270,7 @@ class TaskManager:
             self.set_task_status(t.task_id, Status.COMPLETED)
         self.exec.clear()
 
-    def assign_month_simple(self, capacity_days: int = CAPACITY_DAYS):
+    def assign_month_simple(self, capacity_days: int = CAPACITY_DAYS): # דניאל / סתיו
         """
         Assigns tasks for the current month until capacity is reached.
 
@@ -291,7 +290,7 @@ class TaskManager:
                 waiting.append(t)
         return assigned, waiting
 
-    def system_preset(self):
+    def system_preset(self): # ישראל חי - זליכה
         """
         Resets the system and loads a predefined set of tasks into the system.
         Resets Task ID generator if necessary.

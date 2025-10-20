@@ -1,6 +1,3 @@
-#Written by:
-#  ישראל-חי זליכה
-
 from task import Task
 
 

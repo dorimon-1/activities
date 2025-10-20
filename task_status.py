@@ -1,9 +1,7 @@
-#Written by:
-#  ישראל-חי זליכה
 from enum import Enum
 
 
-class Status(Enum):
+class Status(Enum): # ישראל חי - זליכה
     """
     Enum representing the status of a task.
 

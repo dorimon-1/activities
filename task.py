@@ -1,5 +1,3 @@
-#Written by:
-#תמיד אבני
 from task_status import Status
 
 class Task:
@@ -10,7 +8,7 @@ class Task:
 
     _id_generator = 100
 
-    def __init__(self, description, priority, duration, status=Status.PENDING):
+    def __init__(self, description, priority, duration, status=Status.PENDING): # תמיר אבני
         """
         Initializes a Task object.
 
@@ -25,10 +23,9 @@ class Task:
         self.description = description
         self.priority = priority
         self.duration = duration
-        self._status = None
-        self.set_status(status)  # Validate and set status
+        self._status = status
 
-    def __str__(self):
+    def __str__(self): # תמיר אבני
         """
         Returns a string representation of the task.
 
@@ -36,25 +33,25 @@ class Task:
             str: Task info with ID, description, priority, duration, and status.
         """
         return (f"Task #{self.task_id}: {self.description} "
-                f"(priority: {self.priority}, duration: {self.duration} days, status: {self.status.name})")
+                f"(priority: {self.priority}, duration: {self.duration} days, status: {self.get_status().value})")
 
-    def get_description(self):
+    def get_description(self): # תמיר אבני
         """Returns the task description."""
         return self.description
 
-    def get_priority(self):
+    def get_priority(self): # תמיר אבני
         """Returns the task priority."""
         return self.priority
 
-    def get_duration(self):
+    def get_duration(self): # תמיר אבני
         """Returns the task duration in days."""
         return self.duration
 
-    def get_status(self):
+    def get_status(self) -> Status: # תמיר אבני
         """Returns the task status."""
         return self._status
 
-    def set_description(self, description: str):
+    def set_description(self, description: str): # תמיר אבני
         """
         Updates the task description.
 
@@ -63,7 +60,7 @@ class Task:
         """
         self.description = description
 
-    def set_priority(self, priority: int):
+    def set_priority(self, priority: int): # תמיר אבני
         """
         Updates the task priority.
 
@@ -72,7 +69,7 @@ class Task:
         """
         self.priority = priority
 
-    def set_duration(self, duration: int):
+    def set_duration(self, duration: int): # תמיר אבני
         """
         Updates the task duration.
 
@@ -81,23 +78,7 @@ class Task:
         """
         self.duration = duration
 
-    # ----- status (Enum-only) -----
-    @property
-    def status(self) -> Status:
-        """Returns the task status (getter for property)."""
-        return self._status
-
-    @status.setter
-    def status(self, value: Status):
-        """
-        Sets the task status via property setter.
-
-        Args:
-            value (Status): Status enum to set.
-        """
-        self.set_status(value)
-
-    def set_status(self, status: Status):
+    def set_status(self, status: Status): # תמיר אבני
         """
         Validates and sets the task status.
 
@@ -107,12 +88,12 @@ class Task:
         Raises:
             TypeError: If status is not a Status enum.
         """
-        if not isinstance(status, Status):
+        if not isinstance(status, Status): # תמיר אבני
             raise TypeError("status must be a Status enum")
         self._status = status
 
     @property
-    def id_generator(self):
+    def id_generator(self): # תמיר אבני
         """Returns the current value of the class-level ID generator."""
         return self._id_generator
 

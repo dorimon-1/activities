@@ -1,5 +1,4 @@
-#Written by:
-#  ישראל-חי זליכה
+
 from task_repo_node import TaskNode
 
 class LinkedList:
@@ -8,13 +7,13 @@ class LinkedList:
     Supports insertion at head, removal, searching, and iteration.
     """
 
-    def __init__(self):
+    def __init__(self): # ישראל - חי זליכה
         """
         Initializes an empty linked list with "head" set to None.
         """
         self.head = None
 
-    def _as_node(self, item) -> TaskNode:
+    def _as_node(self, item) -> TaskNode:   # ישראל - חי זליכה
         """
         Converts a Task object to a TaskNode, or passes through if already a TaskNode.
 
@@ -29,7 +28,7 @@ class LinkedList:
         # כאן item הוא Task
         return TaskNode(item)
 
-    def find(self, task_id):
+    def find(self, task_id): # ישראל חי - זליכה
         """
         Searches for a task by its ID in the linked list.
 
@@ -46,7 +45,7 @@ class LinkedList:
             cur = cur.next
         return None
 
-    def insert_head(self, item) -> bool:
+    def insert_head(self, item) -> bool: # ישראל חי - זליכה
         """
         Inserts a task or TaskNode at the head of the list (O(1)).
         Prevents duplicates based on task_id.
@@ -64,7 +63,7 @@ class LinkedList:
         self.head = node
         return True
 
-    def remove(self, task_id) -> bool:
+    def remove(self, task_id) -> bool: # ישראל חי - זליכה
         """
         Removes a task by its ID from the list.
 
@@ -86,7 +85,7 @@ class LinkedList:
             prev, cur = cur, cur.next
         return False
 
-    def __iter__(self):
+    def __iter__(self): # ישראל חי - זליכה
         """
         Iterates over TaskNode objects in the list.
 
@@ -98,7 +97,7 @@ class LinkedList:
             yield cur
             cur = cur.next
 
-    def __len__(self):
+    def __len__(self): # ישראל חי - זליכה
         """
         Returns the number of nodes in the list.
 
@@ -111,7 +110,7 @@ class LinkedList:
             cur = cur.next
         return count
 
-    def display(self):
+    def display(self): # ישראל חי - זליכה
         """
         Prints all tasks in the list to the console.
         """

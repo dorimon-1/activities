@@ -1,5 +1,3 @@
-#Written by:
-#דור סהר
 class TreapNode:
     """
     Node for Treap structure.
@@ -13,7 +11,7 @@ class TreapNode:
     """
     __slots__ = ("key", "prio", "left", "right", "task")
 
-    def __init__(self, key, prio, task=None):
+    def __init__(self, key, prio, task=None): #דור סהר
         self.key = key
         self.prio = prio
         self.left = None
@@ -21,7 +19,7 @@ class TreapNode:
         self.task = task
 
 
-def rotate_right(y):
+def rotate_right(y): # דור סהר
     """
     Performs a right rotation on a subtree rooted at y.
 
@@ -35,7 +33,7 @@ def rotate_right(y):
     return x
 
 
-def rotate_left(x):
+def rotate_left(x): # דור סהר
     """
     Performs a left rotation on a subtree rooted at x.
 
@@ -49,7 +47,7 @@ def rotate_left(x):
     return y
 
 
-def treap_insert(t, key, heap_prio, task):
+def treap_insert(t, key, heap_prio, task): # דור סהר
     """
     Inserts a task into the Treap while maintaining BST and heap properties.
 
@@ -72,7 +70,7 @@ def treap_insert(t, key, heap_prio, task):
     return t
 
 
-def treap_search(root, key):
+def treap_search(root, key): # דור סהר
     """Searches for a node by key in the Treap."""
     cur = root
     while cur:
@@ -85,7 +83,7 @@ def treap_search(root, key):
     return None
 
 
-def treap_merge(left, right):
+def treap_merge(left, right): # דור סהר
     """Merges two treaps and returns the new root."""
     if not left or not right:
         return left or right
@@ -97,7 +95,7 @@ def treap_merge(left, right):
         return right
 
 
-def treap_delete(root, key):
+def treap_delete(root, key): # דור סהר
     """Deletes a node by key from the Treap."""
     if root is None:
         return None
@@ -110,7 +108,7 @@ def treap_delete(root, key):
     return root
 
 
-def treap_collect_all(root, acc):
+def treap_collect_all(root, acc): # דור סהר
     """Collects all nodes in the Treap into a list."""
     if not root:
         return
@@ -119,7 +117,7 @@ def treap_collect_all(root, acc):
     treap_collect_all(root.right, acc)
 
 
-def treap_inorder(root, acc):
+def treap_inorder(root, acc): # דור סהר
     """In-order traversal of the Treap, storing nodes in acc."""
     if not root:
         return
@@ -131,21 +129,21 @@ def treap_inorder(root, acc):
 class Treap:
     """Treap structure combining BST ordering by key and heap by priority."""
 
-    def __init__(self):
+    def __init__(self): # דור סהר
         self.root = None
 
-    def insert(self, task):
+    def insert(self, task): # דור סהר
         """Inserts a task into the Treap based on (priority, task_id)."""
         key = (task.priority, task.task_id)
         heap_prio = task.priority
         self.root = treap_insert(self.root, key, heap_prio, task)
         return True
 
-    def peek_max(self):
+    def peek_max(self): # דור סהר
         """Returns the task with maximum priority without removing it."""
         return self.root.task if self.root and self.root.task else None
 
-    def pop_max(self):
+    def pop_max(self): # דור סהר
         """Removes and returns the task with maximum priority."""
         if not self.root:
             return None
@@ -153,7 +151,7 @@ class Treap:
         self.root = treap_merge(self.root.left, self.root.right)
         return max_task
 
-    def find_node_by_id(self, node, task_id):
+    def find_node_by_id(self, node, task_id): # דור סהר
         """Finds a TreapNode by its task_id."""
         if not node:
             return None
@@ -163,7 +161,7 @@ class Treap:
         if left: return left
         return self.find_node_by_id(node.right, task_id)
 
-    def delete_by_id(self, task_id):
+    def delete_by_id(self, task_id): # דור סהר
         """Deletes a task from the Treap by task_id."""
         node = self.find_node_by_id(self.root, task_id)
         if not node:
@@ -171,7 +169,7 @@ class Treap:
         self.root = treap_delete(self.root, node.key)
         return True
 
-    def update_task_priority(self, task_id, new_priority):
+    def update_task_priority(self, task_id, new_priority): # דור סהר
         """Updates the priority of a task in the Treap."""
         node = self.find_node_by_id(self.root, task_id)
         if not node or not node.task:
@@ -180,7 +178,7 @@ class Treap:
         node.task.priority = new_priority
         return self.insert(node.task)
 
-    def to_list(self, order="des"):
+    def to_list(self, order="desc"): # דור סהר
         """Returns a list of tasks in-order (ascending or descending by priority)."""
         nodes = []
         treap_inorder(self.root, nodes)
@@ -189,11 +187,11 @@ class Treap:
             tasks.reverse()
         return tasks
 
-    def clear(self):
+    def clear(self): # דור סהר
         """Clears the Treap."""
         self.root = None
 
-    def __len__(self):
+    def __len__(self): # דור סהר
         """Returns the number of tasks in the Treap."""
         nodes = []
         treap_collect_all(self.root, nodes)

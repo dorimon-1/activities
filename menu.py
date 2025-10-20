@@ -1,5 +1,3 @@
-# WRITTEN BY:
-#דניאל קצ'מרק + סתיו עזרא
 from task_manager import TaskManager
 from task import Task
 from task_status import Status
@@ -8,7 +6,7 @@ CAPACITY_DAYS = 22
 Added_Priority = 17
 
 
-def pre_init_menu():
+def pre_init_menu(): # דניאל / סתיו
     print("""
 ==== ACTIVITIES ====
 1. System initialization
@@ -17,7 +15,7 @@ def pre_init_menu():
 """)
 
 
-def post_init_menu():
+def post_init_menu(): # דניאל / סתיו
     print("""
 ==== ACTIVITIES ====
 1. Reset system
@@ -37,7 +35,7 @@ def post_init_menu():
 """)
 
 
-def update_menu():
+def update_menu(): # דניאל / סתיו
     print("""
     ==== Update task ====
     1. Description
@@ -47,7 +45,7 @@ def update_menu():
     """)
 
 
-def status_menu():
+def status_menu(): # דניאל / סתיו
     print("""
     ==== status options ====
     1. pending
@@ -58,7 +56,8 @@ def status_menu():
     """)
 
 
-def main():
+def main(): # דניאל / סתיו
+
     pm = TaskManager()
     initialized = False
     while True:
@@ -132,12 +131,12 @@ def main():
                                     t.set_priority(t_priority + Added_Priority)
                                     print(
                                         f"Task #{t.task_id} updated successfully: "
-                                        f"+{Added_Priority} to priority, status changed to {t.get_status().name}")
+                                        f"+{Added_Priority} to priority, status changed to {t.get_status().value}")
 
                                 case 'n':
                                     try:
                                         pm.set_task_status(t.task_id, Status.CANCELLED)
-                                        print(f"Task #{t.task_id} status changed to {t.get_status().name}")
+                                        print(f"Task #{t.task_id} status changed to {t.get_status().value}")
                                         pm.remove_task(t.task_id)
                                         print("Task removed from system.")
                                     except ValueError:
@@ -156,7 +155,7 @@ def main():
 
                 case 6:
                     try:
-                        tid = int(input("Enter ID to search:"))
+                        tid = int(input("Enter ID to search: "))
                         t = pm.get_task(tid)
                         print("Found:", t if t else "Not found.")
                     except ValueError:
@@ -185,13 +184,13 @@ def main():
                                         t.set_priority(t_priority + Added_Priority)
                                         print(
                                             f"Task #{t.task_id} updated successfully: "
-                                            f"+{Added_Priority} to priority, status changed to {t.get_status().name}"
+                                            f"+{Added_Priority} to priority, status changed to {t.get_status().value}"
                                         )
 
                                     case 'n':
                                         try:
                                             pm.set_task_status(t.task_id, Status.CANCELLED)
-                                            print(f"Task #{t.task_id} status changed to {t.get_status().name}")
+                                            print(f"Task #{t.task_id} status changed to {t.get_status().value}")
                                             pm.remove_task(t.task_id)
                                             print("Task removed from system.")
                                         except ValueError:
@@ -216,13 +215,13 @@ def main():
                             match uc:
                                 case 1:
                                     print(f"Current description: {t.get_description()}")
-                                    desc = input("Enter new description").strip()
+                                    desc = input("Enter new description:").strip()
                                     pm.update_task(tid, desc)
                                     break
 
                                 case 2:
                                     print(f"Current duration: {t.get_duration()}")
-                                    dur = int(input("Enter new duration"))
+                                    dur = int(input("Enter new duration:"))
                                     if dur <= 0:
                                         raise ValueError("Duration must be non-negative")
                                     pm.update_task(tid, duration=dur)
@@ -230,14 +229,14 @@ def main():
 
                                 case 3:
                                     print(f"Current priority: {t.get_priority()}")
-                                    pr = int(input("Enter new priority (1 to 10)"))
+                                    pr = int(input("Enter new priority: "))
                                     if pr <= 0:
                                         raise ValueError("Priority must be non negative")
                                     pm.update_task(tid, priority=pr)
                                     break
 
                                 case 4:
-                                    print(f"Current Status: {t.get_status()}")
+                                    print(f"Current Status: {t.get_status().value}")
                                     status_menu()
                                     sc = input("Please choose new status for task: ").strip()
                                     mapping = {  # map the status to a number to know what to change in the task status
@@ -289,6 +288,8 @@ def main():
 
                 case 12:
                     pm.table.display()
+                    total = pm.table.__len__()
+                    print(f"\nThere are total of {total} tasks in task repository")
                     continue
 
                 case 0:
