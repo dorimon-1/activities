@@ -222,18 +222,6 @@ class TaskManager:
         task.set_status(Status.SCHEDULED)
         return True, msg, removed
 
-    def create_priority_queue(self, order="desc"): # דור סהר
-        """
-        Returns the list of tasks sorted by priority.
-
-        Args:
-            order (str): "desc" for descending, "asc" for ascending priority.
-
-        Returns:
-            list: Sorted tasks.
-        """
-        return self.treap.to_list(order=order)
-
     def print_tasks_by_priority(self): # דור סהר
         """
         Returns a string representation of tasks ordered by priority.
@@ -241,7 +229,7 @@ class TaskManager:
         Returns:
             str: Tasks joined by newline.
         """
-        return "\n".join(str(t) for t in self.create_priority_queue())
+        return "\n".join(str(t) for t in self.treap.to_list())
 
     @property
     def exec_queue_as_list(self): # דניאל / סתיו

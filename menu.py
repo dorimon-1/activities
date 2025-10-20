@@ -26,10 +26,9 @@ def post_init_menu(): # דניאל / סתיו
 6. Show task by id
 7. Add task to execution queue
 8. Update task
-9. Show priority list
-10.Show execution queue
-11.Show completed tasks
-12.Show all tasks
+9.Show execution queue
+10.Show completed tasks
+11.Show all tasks
 0. Exit
 ============================
 """)
@@ -261,13 +260,6 @@ def main(): # דניאל / סתיו
                         print("Invalid input.")
 
                 case 9:
-                    pq = pm.create_priority_queue()
-                    print("Tasks in Priority line: ")
-                    for t in pq:
-                        print(" ", t)
-                    continue
-
-                case 10:
                     q = pm.exec_queue_as_list
                     if not q:
                         print("No tasks in the execution queue.")
@@ -277,7 +269,7 @@ def main(): # דניאל / סתיו
                             print(f"{idx}. {t}")
                     continue
 
-                case 11:
+                case 10:
                     items = pm.completed_tasks_as_list()
                     if not items:
                         print("No completed tasks yet")
@@ -286,7 +278,7 @@ def main(): # דניאל / סתיו
                             print(t)
                     continue
 
-                case 12:
+                case 11:
                     pm.table.display()
                     total = pm.table.__len__()
                     print(f"\nThere are total of {total} tasks in task repository")
