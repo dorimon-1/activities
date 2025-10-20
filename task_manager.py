@@ -1,4 +1,3 @@
-
 from task import Task
 from treap_dataset import Treap
 from task_repo import Hashtable
@@ -118,7 +117,7 @@ class TaskManager:
 
         return updated, ("Updated successfully" if updated else "Not updated")
 
-    def set_task_status(self, task_id: int, new_status: Status) -> tuple[bool, str]: # סתיו עזרא
+    def set_task_status(self, task_id: int, new_status: Status): # סתיו עזרא
         """
         Changes the status of a task and updates its location in repositories accordingly.
 
