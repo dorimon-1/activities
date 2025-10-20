@@ -262,8 +262,7 @@ class TaskManager:
         """
         Assigns tasks for the current month until capacity is reached.
 
-        Args:
-            capacity_days (int): Maximum days for scheduling.
+        capacity_days (int): Maximum days for scheduling.
 
         Returns:
             tuple: (assigned_tasks, waiting_tasks)
