@@ -16,7 +16,7 @@ class Task:
             description (str): Description of the task.
             priority (int): Priority of the task.
             duration (int): Duration of the task in days.
-            status (Status, optional): Initial status of the task. Defaults to Status.PENDING.
+            status (Status = PENDING): Initial status of the task. Defaults to Status.PENDING.
         """
         self.task_id = Task._id_generator
         Task._id_generator += 1
