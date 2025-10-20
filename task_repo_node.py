@@ -10,7 +10,7 @@ class TaskNode:
         next (TaskNode or None): Reference to the next node in the list.
     """
 
-    def __init__(self, task: Task):
+    def __init__(self, task: Task): # ישראל חי - זליכה
         """
         Initializes a TaskNode with a Task object.
 
