@@ -26,7 +26,7 @@ def post_init_menu(): # סתיו עזרא
 6. Show task by id
 7. Add task to execution queue
 8. Update task
-9.Show execution queue
+9. Show execution queue
 10.Show completed tasks
 11.Show all tasks
 0. Exit
